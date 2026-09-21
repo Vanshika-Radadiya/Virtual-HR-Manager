@@ -1,0 +1,38 @@
+<div class="shell">
+  @if (!isAuthenticated()) {
+    <app-login
+      [errorMessage]="errorMessage()"
+      [isLoading]="isLoading()"
+      (submitted)="login($event)"
+    />
+  } @else if (activeInterview(); as interview) {
+    @if (currentQuestion(); as question) {
+      <app-interview
+        [interview]="interview"
+        [question]="question"
+        [questionNumber]="questionNumber()"
+        [transcript]="transcript()"
+        [isListening]="isListening()"
+        [isSpeaking]="isSpeaking()"
+        [isSubmitting]="isSubmitting()"
+        [speechSupported]="speechSupported"
+        (back)="exitInterview()"
+        (speak)="speakQuestion()"
+        (toggleRecording)="toggleListening()"
+        (submit)="submitResponse()"
+        (transcriptChange)="transcript.set($event)"
+      />
+    }
+  } @else {
+    <app-dashboard
+      [upcomingInterviews]="upcomingInterviews()"
+      [pastInterviews]="pastInterviews()"
+      [results]="results()"
+      [userId]="userId()"
+      [today]="today"
+      (signOut)="logout()"
+      (refresh)="loadWorkspace()"
+      (startInterview)="startInterview($event)"
+    />
+  }
+</div>

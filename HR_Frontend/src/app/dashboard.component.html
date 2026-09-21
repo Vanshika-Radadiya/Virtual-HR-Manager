@@ -1,0 +1,156 @@
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-mark small" aria-hidden="true">hm</div>
+    <span>HR Manager</span>
+  </div>
+  <div class="topbar-actions">
+    <span class="status-dot"></span>
+    <span>Candidate portal</span>
+    <span class="user-chip">ID {{ userId }}</span>
+    <button class="text-button" (click)="signOut.emit()">Sign out</button>
+  </div>
+</header>
+
+<main class="dashboard">
+  <section class="welcome-row">
+    <div>
+      <p class="eyebrow warm">Candidate workspace</p>
+      <h1>Good to see you.</h1>
+      <p class="muted">Your next opportunity is closer than you think.</p>
+    </div>
+    <div class="date-card">
+      <span>Today</span>
+      <strong>{{ today }}</strong>
+    </div>
+  </section>
+
+  <section class="dashboard-grid">
+    <div class="content-column">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Your schedule</p>
+          <h2>Upcoming interviews</h2>
+        </div>
+        <span class="count-badge">{{ upcomingInterviews.length }} scheduled</span>
+      </div>
+
+      @if (upcomingInterviews.length) {
+        @for (interview of upcomingInterviews; track interview.interviewId) {
+          <article class="interview-card">
+            <div class="calendar-icon">{{ getDay(interview.startDate) }}</div>
+            <div class="interview-info">
+              <span class="interview-date">{{ formatDate(interview.startDate) }}</span>
+              <h3>{{ interview.role }}</h3>
+              <p>{{ interview.description }}</p>
+            </div>
+            <button
+              class="arrow-button"
+              (click)="startInterview.emit(interview)"
+              aria-label="Start interview"
+            >
+              ↗
+            </button>
+          </article>
+        }
+      } @else {
+        <div class="empty-state">
+          No upcoming interviews found. Your recruiter will add one here when ready.
+        </div>
+      }
+    </div>
+
+    <aside class="side-column">
+      <div class="side-heading">
+        <p class="eyebrow">Your progress</p>
+        <button class="refresh-button" (click)="refresh.emit()" aria-label="Refresh workspace">
+          ↻
+        </button>
+      </div>
+      <div class="progress-card">
+        <div class="progress-ring">
+          <strong>{{ resultSummary() }}%</strong>
+          <span>average</span>
+        </div>
+        <p>Interview readiness</p>
+        <small>Based on your latest recruiter-reviewed results</small>
+      </div>
+      <div class="tip-card">
+        <span class="tip-icon">✦</span>
+        <div>
+          <strong>Small reminder</strong>
+          <p>Find a quiet place and check your microphone before you begin.</p>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <section class="past-section">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Interview history</p>
+        <h2>Past interviews</h2>
+      </div>
+      <span class="count-badge">{{ pastInterviews.length }} completed</span>
+    </div>
+
+    @if (pastInterviews.length) {
+      <div class="past-list">
+        @for (interview of pastInterviews; track interview.interviewId) {
+          <div class="past-item">
+            <button
+              class="past-interview-card"
+              [class.selected]="selectedPastInterview?.interviewId === interview.interviewId"
+              (click)="selectPastInterview(interview)"
+            >
+              <span class="past-calendar">{{ getDay(interview.startDate) }}</span>
+              <span class="past-info">
+                <strong>{{ interview.role }}</strong>
+                <small>{{ formatDate(interview.startDate) }}</small>
+              </span>
+              <span class="past-arrow">
+                {{ selectedPastInterview?.interviewId === interview.interviewId ? '↓' : '→' }}
+              </span>
+            </button>
+
+            @if (selectedPastInterview?.interviewId === interview.interviewId) {
+              <section class="report-panel">
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow warm">Interview report</p>
+                    <h2>{{ interview.role }}</h2>
+                    <p class="muted">Completed {{ formatDate(interview.endDate) }}</p>
+                  </div>
+                  <button class="text-button" (click)="selectedPastInterview = null">Close</button>
+                </div>
+
+                @if (selectedReport(); as report) {
+                  <div class="score-grid">
+                    <div class="score-item oops-score" [style.--score]="report.oops">
+                      <span class="score-label">OOPS score</span>
+                      <strong>{{ report.oops }}</strong>
+                      <small>Object-oriented programming</small>
+                    </div>
+                    <div class="score-item dbms-score" [style.--score]="report.dbms">
+                      <span class="score-label">DBMS score</span>
+                      <strong>{{ report.dbms }}</strong>
+                      <small>Database management</small>
+                    </div>
+                    <div class="score-item os-score" [style.--score]="report.os">
+                      <span class="score-label">OS score</span>
+                      <strong>{{ report.os }}</strong>
+                      <small>Operating systems</small>
+                    </div>
+                  </div>
+                } @else {
+                  <div class="empty-state">The report for this interview is not available yet.</div>
+                }
+              </section>
+            }
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="empty-state">No completed interviews yet.</div>
+    }
+  </section>
+</main>

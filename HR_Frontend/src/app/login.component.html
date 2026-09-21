@@ -1,0 +1,73 @@
+<main class="login-page">
+  <section class="login-visual">
+    <div class="brand-mark" aria-hidden="true">hm</div>
+    <p class="eyebrow">Human intelligence, made personal</p>
+    <h1>Meet your next<br /><em>best hire.</em></h1>
+    <p class="visual-copy">
+      A calmer, clearer way to show what you know. Step into your interview when you are ready.
+    </p>
+    <div class="visual-note">
+      <span class="pulse"></span>
+      Voice interviews are live and accessible
+    </div>
+  </section>
+
+  <section class="login-panel">
+    <div class="login-form-wrap">
+      <p class="eyebrow warm">Welcome back</p>
+      <h2>Ready when you are.</h2>
+      <p class="muted">Sign in to view your interview schedule and continue your journey.</p>
+
+      <form class="login-form" (submit)="submit($event)">
+        <label for="username">User ID</label>
+        <input
+          id="username"
+          name="username"
+          autocomplete="username"
+          [(ngModel)]="username"
+          placeholder="Enter your user ID"
+          required
+        />
+
+        <label for="password">Password</label>
+        <div class="password-field">
+          <input
+            id="password"
+            name="password"
+            [type]="showPassword ? 'text' : 'password'"
+            autocomplete="current-password"
+            [(ngModel)]="password"
+            placeholder="Enter your password"
+            required
+          />
+          <button
+            type="button"
+            class="icon-button"
+            (click)="showPassword = !showPassword"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+          >
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+
+        @if (errorMessage) {
+          <p class="error-message" role="alert">{{ errorMessage }}</p>
+        }
+
+        <button class="primary-button full-width" type="submit" [disabled]="isLoading">
+          {{ isLoading ? 'Signing in...' : 'Enter workspace' }} <span>→</span>
+        </button>
+      </form>
+
+      <p class="privacy-note">
+        <span>⌁</span>
+        Your responses are handled securely for recruiter review.
+      </p>
+    </div>
+
+    <div class="login-footer">
+      <span>HR Manager</span>
+      <span>v1.0 · Candidate portal</span>
+    </div>
+  </section>
+</main>

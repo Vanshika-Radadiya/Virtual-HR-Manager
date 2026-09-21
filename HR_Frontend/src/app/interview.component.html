@@ -1,0 +1,78 @@
+<main class="dashboard">
+  <section class="interview-shell">
+    <div class="interview-header">
+      <button class="back-button" (click)="back.emit()">← Dashboard</button>
+      <div class="interview-meta">
+        <span class="live-pill"><span class="pulse"></span> Live interview</span>
+        <span>{{ interview.role }}</span>
+      </div>
+    </div>
+
+    <div class="interview-progress">
+      <span>Question {{ questionNumber }}</span>
+      <div class="progress-track">
+        <div class="progress-value" [style.width.%]="100"></div>
+      </div>
+      <span>In progress</span>
+    </div>
+
+    <div class="interview-grid">
+      <section class="question-panel">
+        <p class="eyebrow warm">Listen carefully</p>
+        <h1>{{ question.que }}</h1>
+        <button class="speak-button" (click)="speak.emit()">
+          <span class="sound-bars"><i></i><i></i><i></i></span>
+          {{ isSpeaking ? 'Speaking question...' : 'Play question again' }}
+          <span>↗</span>
+        </button>
+        <div class="category-label">{{ question.category }} · level {{ question.level + 1 }}</div>
+      </section>
+
+      <section class="response-panel">
+        <div class="response-top">
+          <div>
+            <p class="eyebrow">Your response</p>
+            <h2>{{ isListening ? 'I’m listening...' : 'Take your time.' }}</h2>
+          </div>
+          <span class="recording-indicator" [class.active]="isListening">
+            <span></span>{{ isListening ? 'Recording' : 'Ready' }}
+          </span>
+        </div>
+
+        <div class="transcript-box" [class.listening]="isListening">
+          <p>{{ transcript || 'Your spoken response will appear here in real time.' }}</p>
+          <span class="cursor" [class.visible]="isListening"></span>
+        </div>
+
+        <div class="response-actions">
+          <button class="record-button" [class.stop]="isListening" (click)="toggleRecording.emit()">
+            <span>{{ isListening ? '■' : '●' }}</span>
+            {{ isListening ? 'Finish response' : 'Start speaking' }}
+          </button>
+          <button
+            class="submit-button"
+            (click)="submit.emit()"
+            [disabled]="!transcript.trim() || isSubmitting"
+          >
+            {{ isSubmitting ? 'Saving...' : 'Submit response' }} <span>→</span>
+          </button>
+        </div>
+
+        <p class="mic-note">
+          {{
+            speechSupported
+              ? 'Your microphone is ready. You can also type your response.'
+              : 'Voice input is unavailable in this browser. You can type your response.'
+          }}
+        </p>
+        <textarea
+          class="fallback-input"
+          aria-label="Response text"
+          [value]="transcript"
+          (input)="updateTranscript($event)"
+          placeholder="Type your response if you prefer..."
+        ></textarea>
+      </section>
+    </div>
+  </section>
+</main>
