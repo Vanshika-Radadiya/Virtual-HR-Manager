@@ -8,18 +8,23 @@ import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.vanshika.springboot.model.AnswerResponse;
 import com.vanshika.springboot.model.CompId;
 import com.vanshika.springboot.model.EmailDetails;
 import com.vanshika.springboot.model.Interview;
+import com.vanshika.springboot.model.InterviewAssignment;
+import com.vanshika.springboot.model.InterviewDetails;
 import com.vanshika.springboot.model.Question;
 import com.vanshika.springboot.model.QuestionResponse;
 import com.vanshika.springboot.model.Record;
 import com.vanshika.springboot.model.Result;
 import com.vanshika.springboot.model.User;
 import com.vanshika.springboot.repository.InterviewRepo;
+import com.vanshika.springboot.repository.InterviewAssignmentRepo;
+import com.vanshika.springboot.repository.InterviewDetailsRepo;
 import com.vanshika.springboot.repository.RecordRepo;
 import com.vanshika.springboot.repository.ResultRepo;
 import com.vanshika.springboot.repository.UserRepo;
@@ -29,6 +34,10 @@ public class QuestionService {
 	
 	@Autowired
 	RecordRepo recordRepo;
+	@Autowired
+	InterviewAssignmentRepo assignmentRepo;
+	@Autowired
+	InterviewDetailsRepo interviewDetailsRepo;
 	@Autowired
 	ResultRepo resultRepo;
 	@Autowired
@@ -56,7 +65,15 @@ public class QuestionService {
 	}
 	
 	
+	@Transactional
 	public QuestionResponse generateNewQuestion(AnswerResponse ansResp)throws Exception {
+		InterviewAssignment assignment = assignmentRepo.findByInterviewIdAndUserIdForUpdate(
+				ansResp.getInterviewId(), ansResp.getUserId())
+				.orElseThrow(() -> new IllegalArgumentException("Candidate is not assigned to this interview."));
+		if (assignment.isCompleted()) {
+			throw new IllegalArgumentException("This interview has already been completed.");
+		}
+
 		String newCategory = ansResp.getCategory();
 		int newLevel = ansResp.getLevel();
 		String key1 = ansResp.getKey();
@@ -131,6 +148,14 @@ public class QuestionService {
 			return new QuestionResponse(ques.getQue(), newCategory, newLevel, key );
 		}
 		else {
+			assignment.setCompleted(true);
+			assignmentRepo.save(assignment);
+
+			CompId compId = new CompId(ansResp.getUserId(), ansResp.getInterviewId());
+			InterviewDetails details = interviewDetailsRepo.findById(compId)
+					.orElseGet(() -> new InterviewDetails(compId, assignment.getStartDate()));
+			details.setEndDate(LocalDateTime.now());
+			interviewDetailsRepo.save(details);
 //Email Sending via SMTP
 			
 			User user = userService.getUsernameByUserId(ansResp.getUserId());
@@ -140,15 +165,15 @@ public class QuestionService {
 			String role = inter.getRole();
 			
 			String subject = "Thank you for completing your virtual interview - "+role+" " ;
-			String receiver = "honeyradadiya04@gmail.com";
+			String receiver = user.getEmailId();
 			String body = "Hi "+ username +", \nThank you for completing your virtual interview as our Screening process. "
 					+ "We have successfully received your recorded responses and submission data. Our team will review the "
 					+ "interview and reach out to you with the next steps within 3-5 business days.\n"
 					+ "Thank you" ;
-			EmailDetails details = new EmailDetails(receiver, subject, body);
+			EmailDetails detail = new EmailDetails(receiver, subject, body);
 			
-			emailService.sendSimpleMail(details);
-			throw new IllegalArgumentException("Test Completedd!!");
+			emailService.sendSimpleMail(detail);
+			return null;
 		}
 		
 		
@@ -158,4 +183,3 @@ public class QuestionService {
 		return (int)((Math.random()*100) % upper);
 	}
 }
-

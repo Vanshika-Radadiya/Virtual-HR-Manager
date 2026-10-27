@@ -1,5 +1,7 @@
 package com.vanshika.springboot.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
@@ -25,19 +27,20 @@ public class QuestionController {
 	QuestionService questionService;
 	
 	@PostMapping("/saverecord")
-	public ResponseEntity<QuestionResponse> generateNewQuestion(@RequestBody AnswerResponse ansResp){
+	public ResponseEntity<?> generateNewQuestion(@RequestBody AnswerResponse ansResp){
 		try {
 			QuestionResponse Qr =  questionService.generateNewQuestion(ansResp);
 //			System.out.println(Qr.getQ);
 			return ResponseEntity.status(HttpStatus.ACCEPTED).body(Qr);
 		}
 		catch(IllegalArgumentException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
 
 		}
 		catch(Exception e) {
 			System.out.println(e);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(Map.of("message", "The response could not be saved."));
 
 		}
 		

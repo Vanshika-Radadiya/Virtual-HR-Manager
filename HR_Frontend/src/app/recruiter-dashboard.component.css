@@ -1,0 +1,203 @@
+.recruiter-dashboard {
+  max-width: 1440px;
+}
+.recruiter-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(310px, 0.85fr);
+  align-items: start;
+  gap: 30px;
+}
+.recruiter-interviews,
+.schedule-panel {
+  min-width: 0;
+}
+.recruiter-interview-list {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+.recruiter-interview-card {
+  display: grid;
+  gap: 7px;
+  width: 100%;
+  padding: 18px 20px;
+  border: 1px solid #e0e4dd;
+  border-radius: 4px;
+  background: #fff;
+  color: #2d4f49;
+  text-align: left;
+  cursor: pointer;
+}
+.recruiter-interview-card:hover,
+.recruiter-interview-card.selected {
+  border-color: #8eafa4;
+  box-shadow: 0 7px 18px rgba(37, 77, 69, 0.08);
+}
+.recruiter-interview-card strong {
+  font: 22px Georgia, serif;
+}
+.recruiter-interview-card > span:not(.recruiter-interview-date):not(.recruiter-open-label) {
+  color: #72807b;
+  font-size: 13px;
+}
+.recruiter-interview-date,
+.recruiter-open-label {
+  color: #b47656;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+.recruiter-open-label {
+  justify-self: end;
+}
+.candidate-results {
+  margin-top: 28px;
+}
+.candidate-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #e0e4dd;
+  border-radius: 4px;
+  background: white;
+}
+.candidate-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.candidate-table th,
+.candidate-table td {
+  padding: 13px 12px;
+  border-bottom: 1px solid #edf0eb;
+  text-align: left;
+  white-space: nowrap;
+}
+.candidate-table th {
+  color: #71817a;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.candidate-table tbody tr {
+  cursor: pointer;
+}
+.candidate-table tbody tr:hover,
+.candidate-table tbody tr.selected {
+  background: #f4f7f3;
+}
+.candidate-table td:first-child {
+  color: #2d4f49;
+  font-weight: 700;
+}
+.candidate-table td small {
+  display: block;
+  color: #71817a;
+}
+.schedule-panel {
+  padding: 26px;
+  border: 1px solid #e0e4dd;
+  border-radius: 4px;
+  background: #fff;
+}
+.schedule-panel h2 {
+  margin: 0 0 9px;
+  color: #263e38;
+  font: 27px Georgia, serif;
+}
+.schedule-panel > .muted {
+  margin-bottom: 22px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.schedule-form {
+  display: grid;
+  gap: 10px;
+}
+.schedule-form label {
+  margin-top: 6px;
+  color: #52645c;
+  font-size: 12px;
+  font-weight: 700;
+}
+.schedule-form input,
+.schedule-form textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #dce2dc;
+  border-radius: 3px;
+  background: #fcfdfa;
+  color: #263e38;
+  font: inherit;
+  font-size: 13px;
+}
+.schedule-form textarea {
+  resize: vertical;
+}
+.schedule-form input[type='file'] {
+  padding: 8px;
+  font-size: 12px;
+}
+.import-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  color: #3a7265;
+  font-size: 12px;
+}
+.candidate-count {
+  margin: 8px 0 4px;
+  color: #71817a;
+  font-size: 12px;
+}
+.recruiter-message {
+  margin: 0 0 20px;
+}
+.success-message {
+  color: #286c56;
+}
+.answer-review {
+  margin-top: 26px;
+  padding: 24px;
+  border: 1px solid #e0e4dd;
+  border-radius: 4px;
+  background: #fff;
+}
+.answer-card {
+  padding: 17px 0;
+  border-top: 1px solid #edf0eb;
+}
+.answer-card-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  color: #2d4f49;
+}
+.answer-card-heading span {
+  flex: 0 0 auto;
+  color: #b47656;
+  font-size: 12px;
+}
+.answer-card p {
+  margin: 12px 0 0;
+  color: #667770;
+  font-size: 14px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+@media (max-width: 900px) {
+  .recruiter-layout {
+    grid-template-columns: 1fr;
+  }
+  .schedule-panel {
+    grid-row: 1;
+  }
+}
+@media (max-width: 600px) {
+  .schedule-panel,
+  .answer-review {
+    padding: 18px;
+  }
+  .candidate-table th,
+  .candidate-table td {
+    padding: 11px 9px;
+  }
+}

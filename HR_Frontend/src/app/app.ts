@@ -1,8 +1,10 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { DashboardComponent } from './dashboard.component';
 import { HrApiService, Interview, Question, Result } from './hr-api.service';
 import { InterviewComponent } from './interview.component';
 import { LoginComponent } from './login.component';
+import { RecruiterDashboardComponent } from './recruiter-dashboard.component';
 
 interface SpeechRecognitionEventLike extends Event {
   results: {
@@ -32,7 +34,7 @@ declare global {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [LoginComponent, DashboardComponent, InterviewComponent],
+  imports: [LoginComponent, DashboardComponent, InterviewComponent, RecruiterDashboardComponent],
   templateUrl: './app.html',
   styleUrl: './app.css',
   encapsulation: ViewEncapsulation.None,
@@ -42,6 +44,8 @@ export class App implements OnInit, OnDestroy {
 
   readonly isAuthenticated = signal(false);
   readonly userId = signal<number | null>(null);
+  readonly username = signal('');
+  readonly role = signal('');
   readonly isLoading = signal(false);
   readonly errorMessage = signal('');
   readonly upcomingInterviews = signal<Interview[]>([]);
@@ -67,13 +71,13 @@ export class App implements OnInit, OnDestroy {
   private firstQuestionTimer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
-    const savedUserId = localStorage.getItem('hr-user-id');
-
-    if (savedUserId) {
-      this.userId.set(Number(savedUserId));
-      this.isAuthenticated.set(true);
-      this.loadWorkspace();
-    }
+    this.api.getSession().subscribe({
+      next: (user) => this.setAuthenticatedUser(user.userId, user.username, user.role),
+      error: () => {
+        localStorage.removeItem('hr-user-id');
+        this.isAuthenticated.set(false);
+      },
+    });
   }
 
   ngOnDestroy(): void {
@@ -86,32 +90,53 @@ export class App implements OnInit, OnDestroy {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    this.api.validate(credentials.username, credentials.password).subscribe({
-      next: (id) => {
-        if (id === null || id === undefined) {
-          this.errorMessage.set('Those credentials did not match. Please try again.');
-        } else {
-          this.userId.set(id);
-          this.isAuthenticated.set(true);
-          localStorage.setItem('hr-user-id', String(id));
-          this.loadWorkspace();
-        }
-
+    this.api.login(credentials.username, credentials.password).subscribe({
+      next: (user) => {
+        this.setAuthenticatedUser(user.userId, user.username, user.role);
         this.isLoading.set(false);
       },
-      error: () => {
-        this.errorMessage.set(
-          'Unable to reach HR Manager. Check that the backend is running on port 8080.',
-        );
+      error: (error: unknown) => {
+        if (error instanceof Error && 'status' in error && error.status === 401) {
+          this.errorMessage.set('Those credentials did not match. Please try again.');
+        } else {
+          this.errorMessage.set(
+            'Unable to reach HR Manager. Check that the backend is running on port 8080.',
+          );
+        }
         this.isLoading.set(false);
       },
     });
   }
 
   logout(): void {
+    this.api.logout().subscribe({
+      next: () => this.clearAuthenticatedUser(),
+      error: () => this.errorMessage.set('Unable to sign out. Please try again.'),
+    });
+  }
+
+  private setAuthenticatedUser(userId: number, username: string, role: string): void {
+    this.userId.set(userId);
+    this.username.set(username);
+    this.role.set(role || 'candidate');
+    this.isAuthenticated.set(true);
+    localStorage.removeItem('hr-user-id');
+    this.errorMessage.set('');
+    if (!this.isRecruiter()) {
+      this.loadWorkspace();
+    }
+  }
+
+  private clearAuthenticatedUser(): void {
     localStorage.removeItem('hr-user-id');
     this.isAuthenticated.set(false);
     this.userId.set(null);
+    this.username.set('');
+    this.role.set('');
+  }
+
+  isRecruiter(): boolean {
+    return this.role().toLowerCase() === 'recruiter';
   }
 
   loadWorkspace(): void {
@@ -244,6 +269,7 @@ export class App implements OnInit, OnDestroy {
     this.recorder?.stop();
     this.isListening.set(false);
     this.isSubmitting.set(true);
+    this.errorMessage.set('');
 
     this.api
       .submitAnswer({
@@ -265,11 +291,27 @@ export class App implements OnInit, OnDestroy {
             window.location.reload();
           }
         },
-        error: () => {
+        error: (error: unknown) => {
           this.isSubmitting.set(false);
-          this.errorMessage.set('We could not save that response. Please try again.');
+          this.errorMessage.set(this.getSubmissionError(error));
         },
       });
+  }
+
+  private getSubmissionError(error: unknown): string {
+    if (
+      error instanceof HttpErrorResponse &&
+      typeof error.error === 'object' &&
+      error.error !== null &&
+      'message' in error.error &&
+      typeof error.error.message === 'string'
+    ) {
+      return error.error.message;
+    }
+    if (error instanceof HttpErrorResponse && error.status === 0) {
+      return 'Unable to reach the server. Check that the backend is running, then try again.';
+    }
+    return 'We could not save that response. Please try again.';
   }
 
   private clearFirstQuestionTimer(): void {

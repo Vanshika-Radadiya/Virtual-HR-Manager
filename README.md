@@ -15,6 +15,7 @@ This project simulates a virtual interview experience where a candidate answers 
 - Interview result tracking and scoring
 - MySQL persistence for interviews, users, records, and results
 - Email notification on interview completion
+- Recruiter portal for scheduling interviews, importing candidates, and reviewing scores and answers
 
 ## Tech Stack
 
@@ -55,3 +56,14 @@ This project simulates a virtual interview experience where a candidate answers 
    ```
 
 5. Open the Angular app in the browser, usually at `http://localhost:4200`.
+
+## Recruiter portal
+
+Sign in with a user whose `role` is `recruiter`. Recruiters can schedule interviews using the
+existing interview question flow, add candidate email addresses manually, or import a `.xlsx` or
+`.csv` file with email addresses in its first column. The invitation email includes the interview
+schedule, portal link, and candidate login credentials. Recruiters can select an interview to see
+assigned candidates ordered by score, then open a candidate to review their submitted answers.
+
+Set `HR_FRONTEND_URL` to the deployed frontend URL when running outside local development. The same
+value is used as the allowed frontend origin for session-based API requests.

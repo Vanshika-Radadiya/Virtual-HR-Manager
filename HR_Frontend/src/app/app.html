@@ -10,6 +10,7 @@
       <app-interview
         [interview]="interview"
         [question]="question"
+        [errorMessage]="errorMessage()"
         [questionNumber]="questionNumber()"
         [transcript]="transcript()"
         [isListening]="isListening()"
@@ -23,6 +24,12 @@
         (transcriptChange)="transcript.set($event)"
       />
     }
+  } @else if (isRecruiter()) {
+    <app-recruiter-dashboard
+      [userId]="userId()"
+      [username]="username()"
+      (signOut)="logout()"
+    />
   } @else {
     <app-dashboard
       [upcomingInterviews]="upcomingInterviews()"

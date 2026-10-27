@@ -3,16 +3,20 @@ package com.vanshika.springboot.model;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity(name="Interview")
 public class Interview {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private int interviewId;
 	private String role;
 	private String description;
 	private LocalDateTime startDate;
 	private LocalDateTime endDate;
+	private Integer recruiterId;
 	public int getInterviewId() {
 		return interviewId;
 	}
@@ -42,6 +46,14 @@ public class Interview {
 	}
 	public void setEndDate(LocalDateTime endDate) {
 		this.endDate = endDate;
+	}
+
+	public Integer getRecruiterId() {
+		return recruiterId;
+	}
+
+	public void setRecruiterId(Integer recruiterId) {
+		this.recruiterId = recruiterId;
 	}
 	
 }

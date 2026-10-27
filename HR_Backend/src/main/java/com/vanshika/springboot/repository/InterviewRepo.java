@@ -10,8 +10,9 @@ import com.vanshika.springboot.model.User;
 
 @Repository
 public interface InterviewRepo extends JpaRepository<Interview, Integer>{
-	@Query(value="Select * from interview where interview_id IN(select interview_id from interview_details where user_id =:UID)", nativeQuery=true)
+	@Query(value="Select distinct i.* from interview i where i.interview_id IN(select interview_id from interview_details where user_id =:UID union select interview_id from interview_assignment where user_id =:UID)", nativeQuery=true)
 	List<Interview> getInterviewByUserId(int UID);
-	
+
 	Interview getRoleByInterviewId(int interviewId);
+	List<Interview> findByRecruiterIdOrderByStartDateDesc(Integer recruiterId);
 }

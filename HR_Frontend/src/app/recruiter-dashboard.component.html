@@ -1,0 +1,225 @@
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-mark small" aria-hidden="true">hm</div>
+    <span>HR Manager</span>
+  </div>
+  <div class="topbar-actions">
+    <span class="status-dot"></span>
+    <span>Recruiter portal</span>
+    <span class="user-chip">{{ username || 'Recruiter' }}</span>
+    <button class="text-button" (click)="signOut.emit()">Sign out</button>
+  </div>
+</header>
+
+<main class="dashboard recruiter-dashboard">
+  <section class="welcome-row">
+    <div>
+      <p class="eyebrow warm">Recruiter workspace</p>
+      <h1>Your interviews.</h1>
+      <p class="muted">Schedule candidates and review interview performance.</p>
+    </div>
+    <div class="date-card">
+      <span>Recruiter ID</span>
+      <strong>{{ userId }}</strong>
+    </div>
+  </section>
+
+  @if (errorMessage) {
+    <p class="error-message recruiter-message" role="alert">{{ errorMessage }}</p>
+  }
+  @if (successMessage) {
+    <p class="success-message recruiter-message" role="status">{{ successMessage }}</p>
+  }
+
+  <section class="recruiter-layout">
+    <div class="recruiter-interviews">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Your schedule</p>
+          <h2>Scheduled interviews</h2>
+        </div>
+        <button class="refresh-button" (click)="loadInterviews()" [disabled]="isLoading">
+          {{ isLoading ? 'Loading…' : 'Refresh' }}
+        </button>
+      </div>
+
+      @if (interviews.length) {
+        <div class="recruiter-interview-list">
+          @for (interview of interviews; track interview.interviewId) {
+            <button
+              class="recruiter-interview-card"
+              [class.selected]="selectedInterview?.interviewId === interview.interviewId"
+              (click)="selectInterview(interview)"
+            >
+              <span class="recruiter-interview-date">{{ formatDate(interview.startDate) }}</span>
+              <strong>{{ interview.role }}</strong>
+              <span>{{ interview.description || 'No additional details' }}</span>
+              <span class="recruiter-open-label">View results →</span>
+            </button>
+          }
+        </div>
+      } @else if (!isLoading) {
+        <div class="empty-state">You have not scheduled any interviews yet.</div>
+      }
+
+      @if (selectedInterview) {
+        <section class="candidate-results">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow warm">Candidate results</p>
+              <h2>{{ selectedInterview.role }}</h2>
+              <p class="muted">Sorted by total score · highest first</p>
+            </div>
+          </div>
+
+          @if (candidates.length) {
+            <div class="candidate-table-wrap">
+              <table class="candidate-table">
+                <thead>
+                  <tr>
+                    <th>Candidate</th>
+                    <th>Email</th>
+                    <th>OOPS</th>
+                    <th>OS</th>
+                    <th>DBMS</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (candidate of candidates; track candidate.userId) {
+                    <tr
+                      tabindex="0"
+                      [class.selected]="selectedCandidate?.userId === candidate.userId"
+                      (click)="selectCandidate(candidate)"
+                      (keydown.enter)="selectCandidate(candidate)"
+                    >
+                      <td>{{ candidate.username }}</td>
+                      <td>{{ candidate.emailId }}</td>
+                      <td>{{ candidate.hasResult ? candidate.oops : '—' }}</td>
+                      <td>{{ candidate.hasResult ? candidate.os : '—' }}</td>
+                      <td>{{ candidate.hasResult ? candidate.dbms : '—' }}</td>
+                      <td>
+                        @if (candidate.completed) {
+                          <strong>{{ candidate.score }}/297</strong>
+                          <small>({{ scorePercent(candidate.score) }}%)</small>
+                        } @else {
+                          <span class="muted">{{ candidate.hasResult ? 'In progress' : 'Not started' }}</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="empty-state">No candidates are assigned to this interview.</div>
+          }
+
+          @if (selectedCandidate) {
+            <section class="answer-review">
+              <div class="section-heading">
+                <div>
+                  <p class="eyebrow">Interview answers</p>
+                  <h2>{{ selectedCandidate.username }}</h2>
+                  <p class="muted">{{ selectedCandidate.emailId }}</p>
+                </div>
+                <button class="text-button" (click)="selectedCandidate = null; answers = []">
+                  Close
+                </button>
+              </div>
+              @if (answers.length) {
+                @for (answer of answers; track answer.recordId) {
+                  <article class="answer-card">
+                    <div class="answer-card-heading">
+                      <strong>{{ answer.que }}</strong>
+                      <span>{{ answer.score }} / 100</span>
+                    </div>
+                    <p>{{ answer.ans }}</p>
+                  </article>
+                }
+              } @else {
+                <div class="empty-state">This candidate has not submitted any answers yet.</div>
+              }
+            </section>
+          }
+        </section>
+      }
+    </div>
+
+    <aside class="schedule-panel">
+      <p class="eyebrow warm">Create a test</p>
+      <h2>Schedule an interview</h2>
+      <p class="muted">Candidates will receive their sign-in details and interview schedule by email.</p>
+
+      <form class="schedule-form" (submit)="submitInterview($event)">
+        <label for="interview-role">Test / role name</label>
+        <input
+          id="interview-role"
+          name="role"
+          [(ngModel)]="role"
+          placeholder="e.g. Software Engineer"
+          required
+        />
+
+        <label for="interview-description">Description</label>
+        <textarea
+          id="interview-description"
+          name="description"
+          [(ngModel)]="description"
+          rows="3"
+          placeholder="Add interview context for candidates"
+        ></textarea>
+
+        <label for="interview-start">Start date and time</label>
+        <input
+          id="interview-start"
+          name="startDate"
+          type="datetime-local"
+          [(ngModel)]="startDate"
+          required
+        />
+
+        <label for="interview-end">End date and time</label>
+        <input
+          id="interview-end"
+          name="endDate"
+          type="datetime-local"
+          [(ngModel)]="endDate"
+          required
+        />
+
+        <label for="candidate-emails">Candidate email addresses</label>
+        <textarea
+          id="candidate-emails"
+          name="candidateEmails"
+          [(ngModel)]="candidateEmails"
+          rows="4"
+          placeholder="One email per line, or separate with commas"
+        ></textarea>
+
+        <label for="candidate-file">Or import a .xlsx / .csv file</label>
+        <input
+          id="candidate-file"
+          type="file"
+          accept=".xlsx,.csv"
+          (change)="importFile($event)"
+          [disabled]="isImporting"
+        />
+        @if (isImporting) {
+          <small class="muted">Reading candidate list…</small>
+        }
+        @if (importedEmails.length) {
+          <div class="import-summary">
+            <span>{{ importedEmails.length }} email address(es) imported</span>
+            <button type="button" class="text-button" (click)="removeImportedEmails()">Remove</button>
+          </div>
+        }
+
+        <div class="candidate-count">{{ getCandidateEmails().length }} candidate(s) selected</div>
+        <button class="primary-button full-width" type="submit" [disabled]="isCreating || isImporting">
+          {{ isCreating ? 'Scheduling and sending…' : 'Schedule interview and send email' }}
+        </button>
+      </form>
+    </aside>
+  </section>
+</main>

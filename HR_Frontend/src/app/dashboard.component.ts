@@ -26,7 +26,9 @@ export class DashboardComponent {
 
   selectedReport(): Result | undefined {
     return this.results.find(
-      (result) => result.compId?.interviewId === this.selectedPastInterview?.interviewId,
+      (result) =>
+        result.compId?.interviewId === this.selectedPastInterview?.interviewId &&
+        result.compId?.userId === this.userId,
     );
   }
 
