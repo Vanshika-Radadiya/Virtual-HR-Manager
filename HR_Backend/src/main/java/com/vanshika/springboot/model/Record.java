@@ -1,7 +1,5 @@
 package com.vanshika.springboot.model;
 
-import org.hibernate.annotations.IdGeneratorType;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,7 +15,9 @@ public class Record {
 	private String que;
 	private String ans;
 	private int score;
-	
+
+	protected Record() {
+	}
 
 	public Record(int userId, int interviewId, String que, String ans, int score) {
 		super();
@@ -27,6 +27,11 @@ public class Record {
 		this.ans = ans;
 		this.score = score;
 	}
+
+	public Long getRecordId() {
+		return recordId;
+	}
+
 	public int getUserId() {
 		return userId;
 	}

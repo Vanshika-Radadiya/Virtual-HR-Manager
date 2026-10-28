@@ -20,6 +20,7 @@ import com.vanshika.springboot.model.Record;
 import com.vanshika.springboot.model.Result;
 import com.vanshika.springboot.model.User;
 import com.vanshika.springboot.repository.InterviewRepo;
+import com.vanshika.springboot.repository.InterviewAssignmentRepo;
 import com.vanshika.springboot.repository.RecordRepo;
 import com.vanshika.springboot.repository.ResultRepo;
 import com.vanshika.springboot.repository.UserRepo;
@@ -29,6 +30,8 @@ public class QuestionService {
 	
 	@Autowired
 	RecordRepo recordRepo;
+	@Autowired
+	InterviewAssignmentRepo assignmentRepo;
 	@Autowired
 	ResultRepo resultRepo;
 	@Autowired
@@ -40,7 +43,7 @@ public class QuestionService {
 	
 	
 	private int calculateScore(Question q, String ans) {
-		Map<String, Integer>mp = q.getKeywords();
+		Map<String, Integer> mp = q.getKeywords();
 		int count = 0;
 		int total = 0;
 		for(Entry<String,Integer> word: mp.entrySet()) {
@@ -131,6 +134,19 @@ public class QuestionService {
 			return new QuestionResponse(ques.getQue(), newCategory, newLevel, key );
 		}
 		else {
+			assignmentRepo.findByInterviewIdAndUserId(ansResp.getInterviewId(), ansResp.getUserId())
+					.ifPresent(assignment -> {
+						assignment.setCompleted(true);
+						assignmentRepo.save(assignment);
+					});
+
+			// Update end_date in interview_details to record actual completion time
+			interviewDetailsRepo.findById(new CompId(ansResp.getUserId(), ansResp.getInterviewId()))
+					.ifPresent(details -> {
+						details.setEndDate(LocalDateTime.now());
+						interviewDetailsRepo.save(details);
+					});
+
 //Email Sending via SMTP
 			
 			User user = userService.getUsernameByUserId(ansResp.getUserId());
@@ -140,15 +156,15 @@ public class QuestionService {
 			String role = inter.getRole();
 			
 			String subject = "Thank you for completing your virtual interview - "+role+" " ;
-			String receiver = "honeyradadiya04@gmail.com";
+			String receiver = user.getEmailId();
 			String body = "Hi "+ username +", \nThank you for completing your virtual interview as our Screening process. "
 					+ "We have successfully received your recorded responses and submission data. Our team will review the "
 					+ "interview and reach out to you with the next steps within 3-5 business days.\n"
 					+ "Thank you" ;
-			EmailDetails details = new EmailDetails(receiver, subject, body);
+			EmailDetails detail = new EmailDetails(receiver, subject, body);
 			
-			emailService.sendSimpleMail(details);
-			throw new IllegalArgumentException("Test Completedd!!");
+			emailService.sendSimpleMail(detail);
+			return null;
 		}
 		
 		
@@ -158,4 +174,3 @@ public class QuestionService {
 		return (int)((Math.random()*100) % upper);
 	}
 }
-

@@ -82,6 +82,7 @@
   padding-top: 34px;
   border-top: 1px solid #e1e4dd;
 }
+
 .past-list {
   display: grid;
   gap: 12px;
@@ -376,7 +377,7 @@
   font:
     700 11px 'Trebuchet MS',
     sans-serif;
-  color: #799590;
+  color: #8d5a13;
 }
 .eyebrow.warm {
   color: #be7954;
@@ -608,13 +609,13 @@ button:disabled {
 .refresh-button {
   border: 0;
   background: none;
-  color: #4a746c;
-  font-size: 12px;
+  color: #5c7873;
+  font-size: 4px;
 }
 .dashboard {
   width: min(1120px, calc(100% - 48px));
   margin: 0 auto;
-  padding: 78px 0;
+  padding: 50px 0;
 }
 .welcome-row {
   justify-content: space-between;

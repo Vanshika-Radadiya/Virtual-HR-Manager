@@ -9,6 +9,7 @@ public class AnswerResponse {
 	private String key;
 	private int userId;
 	private int interviewId;
+
 	public AnswerResponse(String answer, String category, int level, String key, int userId, int interviewId) {
 		super();
 		this.answer = answer;
