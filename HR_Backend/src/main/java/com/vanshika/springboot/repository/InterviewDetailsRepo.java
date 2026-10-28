@@ -8,4 +8,6 @@ import com.vanshika.springboot.model.InterviewDetails;
 
 @Repository
 public interface InterviewDetailsRepo extends JpaRepository<InterviewDetails, CompId> {
+    boolean existsByIdInterviewIdAndIdUserId(int interviewId, int userId);
 }
+

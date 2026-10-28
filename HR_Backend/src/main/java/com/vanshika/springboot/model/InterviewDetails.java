@@ -9,43 +9,38 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "interview_details")
 public class InterviewDetails {
+
 	@EmbeddedId
-	private CompId compId;
-	private int reportId;
+	private CompId id;
+
 	private LocalDateTime startDate;
-
 	private LocalDateTime endDate;
+	private LocalDateTime notificationSentAt;
 
-	protected InterviewDetails() {
+	public InterviewDetails() {
 	}
 
-	public InterviewDetails(CompId compId, LocalDateTime startDate) {
-		this.compId = compId;
+	public InterviewDetails(int interviewId, int userId, LocalDateTime startDate, LocalDateTime endDate) {
+		this.id = new CompId(userId, interviewId);
 		this.startDate = startDate;
+		this.endDate = endDate;
+		this.notificationSentAt = LocalDateTime.now();
 	}
 
-	public CompId getCompId() {
-		return compId;
+	public CompId getId() {
+		return id;
 	}
 
-	public void setCompId(CompId compId) {
-		this.compId = compId;
+	public void setId(CompId id) {
+		this.id = id;
 	}
 
 	public int getInterviewId() {
-		return compId.getInterviewId();
+		return id != null ? id.getInterviewId() : 0;
 	}
 
 	public int getUserId() {
-		return compId.getUserId();
-	}
-
-	public int getReportId() {
-		return reportId;
-	}
-
-	public void setReportId(int reportId) {
-		this.reportId = reportId;
+		return id != null ? id.getUserId() : 0;
 	}
 
 	public LocalDateTime getStartDate() {
@@ -62,5 +57,13 @@ public class InterviewDetails {
 
 	public void setEndDate(LocalDateTime endDate) {
 		this.endDate = endDate;
+	}
+
+	public LocalDateTime getNotificationSentAt() {
+		return notificationSentAt;
+	}
+
+	public void setNotificationSentAt(LocalDateTime notificationSentAt) {
+		this.notificationSentAt = notificationSentAt;
 	}
 }

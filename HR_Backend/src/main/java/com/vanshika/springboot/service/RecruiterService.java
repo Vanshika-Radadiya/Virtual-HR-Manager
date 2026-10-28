@@ -27,11 +27,13 @@ import com.vanshika.springboot.model.CreateInterviewRequest;
 import com.vanshika.springboot.model.EmailDetails;
 import com.vanshika.springboot.model.Interview;
 import com.vanshika.springboot.model.InterviewAssignment;
+import com.vanshika.springboot.model.InterviewDetails;
 import com.vanshika.springboot.model.Record;
 import com.vanshika.springboot.model.Result;
 import com.vanshika.springboot.model.CompId;
 import com.vanshika.springboot.model.User;
 import com.vanshika.springboot.repository.InterviewAssignmentRepo;
+import com.vanshika.springboot.repository.InterviewDetailsRepo;
 import com.vanshika.springboot.repository.InterviewRepo;
 import com.vanshika.springboot.repository.RecordRepo;
 import com.vanshika.springboot.repository.ResultRepo;
@@ -49,6 +51,7 @@ public class RecruiterService {
 
 	private final InterviewRepo interviewRepo;
 	private final InterviewAssignmentRepo assignmentRepo;
+	private final InterviewDetailsRepo interviewDetailsRepo;
 	private final UserRepo userRepo;
 	private final ResultRepo resultRepo;
 	private final RecordRepo recordRepo;
@@ -56,10 +59,12 @@ public class RecruiterService {
 	private final String frontendUrl;
 
 	public RecruiterService(InterviewRepo interviewRepo, InterviewAssignmentRepo assignmentRepo,
+			InterviewDetailsRepo interviewDetailsRepo,
 			UserRepo userRepo, ResultRepo resultRepo, RecordRepo recordRepo, EmailService emailService,
 			@Value("${hr.frontend.url:http://localhost:4200}") String frontendUrl) {
 		this.interviewRepo = interviewRepo;
 		this.assignmentRepo = assignmentRepo;
+		this.interviewDetailsRepo = interviewDetailsRepo;
 		this.userRepo = userRepo;
 		this.resultRepo = resultRepo;
 		this.recordRepo = recordRepo;
@@ -118,8 +123,16 @@ public class RecruiterService {
 
 		for (String email : emails) {
 			User candidate = findOrCreateCandidate(email);
-			assignmentRepo.save(new InterviewAssignment(interview.getInterviewId(), candidate.getUserId(),
-					interview.getStartDate()));
+			int interviewId = interview.getInterviewId();
+			int userId = candidate.getUserId();
+
+			// Save to interview_assignment
+			assignmentRepo.save(new InterviewAssignment(interviewId, userId, interview.getStartDate()));
+
+			// Save to interview_details
+			InterviewDetails details = new InterviewDetails(interviewId, userId, interview.getStartDate(), interview.getEndDate());
+			interviewDetailsRepo.save(details);
+
 			sendInvitation(candidate, interview);
 		}
 		return interview;

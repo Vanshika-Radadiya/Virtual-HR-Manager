@@ -8,15 +8,12 @@ import java.util.Map.Entry;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.vanshika.springboot.model.AnswerResponse;
 import com.vanshika.springboot.model.CompId;
 import com.vanshika.springboot.model.EmailDetails;
 import com.vanshika.springboot.model.Interview;
-import com.vanshika.springboot.model.InterviewAssignment;
-import com.vanshika.springboot.model.InterviewDetails;
 import com.vanshika.springboot.model.Question;
 import com.vanshika.springboot.model.QuestionResponse;
 import com.vanshika.springboot.model.Record;
@@ -24,7 +21,6 @@ import com.vanshika.springboot.model.Result;
 import com.vanshika.springboot.model.User;
 import com.vanshika.springboot.repository.InterviewRepo;
 import com.vanshika.springboot.repository.InterviewAssignmentRepo;
-import com.vanshika.springboot.repository.InterviewDetailsRepo;
 import com.vanshika.springboot.repository.RecordRepo;
 import com.vanshika.springboot.repository.ResultRepo;
 import com.vanshika.springboot.repository.UserRepo;
@@ -37,8 +33,6 @@ public class QuestionService {
 	@Autowired
 	InterviewAssignmentRepo assignmentRepo;
 	@Autowired
-	InterviewDetailsRepo interviewDetailsRepo;
-	@Autowired
 	ResultRepo resultRepo;
 	@Autowired
 	EmailService emailService;
@@ -49,7 +43,7 @@ public class QuestionService {
 	
 	
 	private int calculateScore(Question q, String ans) {
-		Map<String, Integer>mp = q.getKeywords();
+		Map<String, Integer> mp = q.getKeywords();
 		int count = 0;
 		int total = 0;
 		for(Entry<String,Integer> word: mp.entrySet()) {
@@ -65,15 +59,7 @@ public class QuestionService {
 	}
 	
 	
-	@Transactional
 	public QuestionResponse generateNewQuestion(AnswerResponse ansResp)throws Exception {
-		InterviewAssignment assignment = assignmentRepo.findByInterviewIdAndUserIdForUpdate(
-				ansResp.getInterviewId(), ansResp.getUserId())
-				.orElseThrow(() -> new IllegalArgumentException("Candidate is not assigned to this interview."));
-		if (assignment.isCompleted()) {
-			throw new IllegalArgumentException("This interview has already been completed.");
-		}
-
 		String newCategory = ansResp.getCategory();
 		int newLevel = ansResp.getLevel();
 		String key1 = ansResp.getKey();
@@ -148,14 +134,19 @@ public class QuestionService {
 			return new QuestionResponse(ques.getQue(), newCategory, newLevel, key );
 		}
 		else {
-			assignment.setCompleted(true);
-			assignmentRepo.save(assignment);
+			assignmentRepo.findByInterviewIdAndUserId(ansResp.getInterviewId(), ansResp.getUserId())
+					.ifPresent(assignment -> {
+						assignment.setCompleted(true);
+						assignmentRepo.save(assignment);
+					});
 
-			CompId compId = new CompId(ansResp.getUserId(), ansResp.getInterviewId());
-			InterviewDetails details = interviewDetailsRepo.findById(compId)
-					.orElseGet(() -> new InterviewDetails(compId, assignment.getStartDate()));
-			details.setEndDate(LocalDateTime.now());
-			interviewDetailsRepo.save(details);
+			// Update end_date in interview_details to record actual completion time
+			interviewDetailsRepo.findById(new CompId(ansResp.getUserId(), ansResp.getInterviewId()))
+					.ifPresent(details -> {
+						details.setEndDate(LocalDateTime.now());
+						interviewDetailsRepo.save(details);
+					});
+
 //Email Sending via SMTP
 			
 			User user = userService.getUsernameByUserId(ansResp.getUserId());

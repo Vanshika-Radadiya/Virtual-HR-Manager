@@ -42,7 +42,7 @@
 }
 .recruiter-interview-date,
 .recruiter-open-label {
-  color: #b47656;
+  color: #ae5f38;
   font-size: 11px;
   letter-spacing: 0.04em;
 }
@@ -173,7 +173,7 @@
 }
 .answer-card-heading span {
   flex: 0 0 auto;
-  color: #b47656;
+  color: #ae5f38;
   font-size: 12px;
 }
 .answer-card p {

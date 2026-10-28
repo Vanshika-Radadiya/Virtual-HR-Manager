@@ -9,7 +9,6 @@ import { Interview, Question } from './hr-api.service';
 export class InterviewComponent {
   @Input({ required: true }) interview!: Interview;
   @Input({ required: true }) question!: Question;
-  @Input({ required: true }) errorMessage = '';
   @Input({ required: true }) questionNumber = 1;
   @Input({ required: true }) transcript = '';
   @Input({ required: true }) isListening = false;

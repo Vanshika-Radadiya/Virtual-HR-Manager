@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject, ChangeDetectorRef  } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
@@ -18,6 +18,7 @@ import {
 })
 export class RecruiterDashboardComponent implements OnInit {
   private readonly api = inject(HrApiService);
+    private readonly cdr= inject(ChangeDetectorRef);
 
   @Input({ required: true }) userId: number | null = null;
   @Input({ required: true }) username = '';
@@ -51,6 +52,7 @@ export class RecruiterDashboardComponent implements OnInit {
       next: (interviews) => {
         this.interviews = interviews;
         this.isLoading = false;
+        this.cdr.markForCheck();
       },
       error: (error: unknown) => {
         this.errorMessage = this.getErrorMessage(error, 'Could not load scheduled interviews.');
@@ -65,7 +67,10 @@ export class RecruiterDashboardComponent implements OnInit {
     this.answers = [];
     this.errorMessage = '';
     this.api.getInterviewCandidates(interview.interviewId).subscribe({
-      next: (candidates) => (this.candidates = candidates),
+      next: (candidates) => {
+        this.candidates = candidates
+        this.cdr.markForCheck();
+      },
       error: (error: unknown) => {
         this.candidates = [];
         this.errorMessage = this.getErrorMessage(error, 'Could not load candidate results.');
@@ -81,7 +86,9 @@ export class RecruiterDashboardComponent implements OnInit {
     this.selectedCandidate = candidate;
     this.answers = [];
     this.api.getCandidateAnswers(interview.interviewId, candidate.userId).subscribe({
-      next: (answers) => (this.answers = answers),
+      next: (answers) => {
+        this.answers = answers,
+        this.cdr.markForCheck(); },
       error: (error: unknown) => {
         this.errorMessage = this.getErrorMessage(error, 'Could not load interview answers.');
       },
@@ -135,6 +142,7 @@ export class RecruiterDashboardComponent implements OnInit {
     this.successMessage = '';
     this.api.createInterview(request).subscribe({
       next: (interview) => {
+        console.log("scheduled");
         this.isCreating = false;
         this.successMessage = `Interview scheduled for ${emails.length} candidate${emails.length === 1 ? '' : 's'}. Invitations were sent.`;
         this.role = '';

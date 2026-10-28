@@ -1,5 +1,4 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation, inject, signal } from '@angular/core';
-import { HttpErrorResponse } from '@angular/common/http';
 import { DashboardComponent } from './dashboard.component';
 import { HrApiService, Interview, Question, Result } from './hr-api.service';
 import { InterviewComponent } from './interview.component';
@@ -269,7 +268,6 @@ export class App implements OnInit, OnDestroy {
     this.recorder?.stop();
     this.isListening.set(false);
     this.isSubmitting.set(true);
-    this.errorMessage.set('');
 
     this.api
       .submitAnswer({
@@ -291,27 +289,11 @@ export class App implements OnInit, OnDestroy {
             window.location.reload();
           }
         },
-        error: (error: unknown) => {
+        error: () => {
           this.isSubmitting.set(false);
-          this.errorMessage.set(this.getSubmissionError(error));
+          this.errorMessage.set('We could not save that response. Please try again.');
         },
       });
-  }
-
-  private getSubmissionError(error: unknown): string {
-    if (
-      error instanceof HttpErrorResponse &&
-      typeof error.error === 'object' &&
-      error.error !== null &&
-      'message' in error.error &&
-      typeof error.error.message === 'string'
-    ) {
-      return error.error.message;
-    }
-    if (error instanceof HttpErrorResponse && error.status === 0) {
-      return 'Unable to reach the server. Check that the backend is running, then try again.';
-    }
-    return 'We could not save that response. Please try again.';
   }
 
   private clearFirstQuestionTimer(): void {
