@@ -109,6 +109,7 @@ export class RecruiterDashboardComponent implements OnInit {
         this.importedEmails = emails;
         this.isImporting = false;
         input.value = '';
+        this.cdr.markForCheck();
       },
       error: (error: unknown) => {
         this.errorMessage = this.getErrorMessage(error, 'Could not read candidate email addresses.');
