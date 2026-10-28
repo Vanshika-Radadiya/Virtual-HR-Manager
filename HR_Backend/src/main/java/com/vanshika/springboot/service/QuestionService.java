@@ -21,6 +21,7 @@ import com.vanshika.springboot.model.Result;
 import com.vanshika.springboot.model.User;
 import com.vanshika.springboot.repository.InterviewRepo;
 import com.vanshika.springboot.repository.InterviewAssignmentRepo;
+import com.vanshika.springboot.repository.InterviewDetailsRepo;
 import com.vanshika.springboot.repository.RecordRepo;
 import com.vanshika.springboot.repository.ResultRepo;
 import com.vanshika.springboot.repository.UserRepo;
@@ -40,6 +41,8 @@ public class QuestionService {
 	UserService userService;
 	@Autowired
 	InterviewService interviewService;
+	@Autowired
+	InterviewDetailsRepo interviewDetailsRepo;
 	
 	
 	private int calculateScore(Question q, String ans) {
