@@ -1,5 +1,5 @@
 package com.vanshika.springboot.controller;
-
+import org.springframework.web.bind.annotation.CrossOrigin;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +13,7 @@ import com.vanshika.springboot.model.LoginRequest;
 import com.vanshika.springboot.model.LoginResponse;
 import com.vanshika.springboot.model.User;
 import com.vanshika.springboot.service.UserService;
-
+@CrossOrigin(origins = "https://virtual-hr-manager.netlify.app")
 @RestController
 public class UserController {
 	private final UserService userService;
