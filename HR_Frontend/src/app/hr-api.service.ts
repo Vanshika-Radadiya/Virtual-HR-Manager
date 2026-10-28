@@ -65,7 +65,7 @@ export interface CreateInterviewRequest {
 @Injectable({ providedIn: 'root' })
 export class HrApiService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = 'http://localhost:8080';
+  private readonly baseUrl = 'https://virtual-hr-manager.onrender.com';
   private readonly credentials = { withCredentials: true };
 
   login(username: string, password: string): Observable<LoginResponse> {
