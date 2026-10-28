@@ -610,7 +610,7 @@ button:disabled {
   border: 0;
   background: none;
   color: #5c7873;
-  font-size: 4px;
+  font-size: 10px;
 }
 .dashboard {
   width: min(1120px, calc(100% - 48px));
