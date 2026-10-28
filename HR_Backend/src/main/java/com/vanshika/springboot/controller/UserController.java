@@ -13,7 +13,7 @@ import com.vanshika.springboot.model.LoginRequest;
 import com.vanshika.springboot.model.LoginResponse;
 import com.vanshika.springboot.model.User;
 import com.vanshika.springboot.service.UserService;
-
+@CrossOrigin(origins = "https://virtual-hr-manager.netlify.app")
 @RestController
 public class UserController {
 	private final UserService userService;
