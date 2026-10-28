@@ -1,3 +1,4 @@
+
 package com.vanshika.springboot;
 
 import org.springframework.context.annotation.Configuration;
@@ -12,6 +13,7 @@ public class CorsConfig implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins("https://virtual-hr-manager.netlify.app")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-                .allowedHeaders("*");
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
 }
